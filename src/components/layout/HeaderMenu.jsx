@@ -15,6 +15,7 @@ const HeaderMenu = ({
     setActiveUrl,
     userLinks,
     onCreateCoupon,
+    onCreateSupplier,
     filterActive,
     onChangeFilterState,
 }) => (
@@ -47,7 +48,11 @@ const HeaderMenu = ({
                     Add new item
                 </Controls.MenuItem>
             </Box>
-
+            <Box as="span" pl={menuIndent}>
+                <Controls.MenuItem active={false} onClick={onCreateSupplier} color="blue.0">
+                    Add new supplier
+                </Controls.MenuItem>
+            </Box>
             <Flex pl="46px" alignItems="center">
                 {userLinks.map(({ url, title }, index) => (
                     <Fragment key={url}>

@@ -5,7 +5,7 @@ import * as Controls from './controls';
 import { Box, Flex, Text } from '../shared';
 import Coupon from '../coupon';
 
-const Dialog = ({ coupon, onClose, onSubmit }) => (
+const Dialog = ({ coupon, onClose, onSubmit, onVote }) => (
     <Box width="600px">
         <Flex bg="gray.0" p="16px">
             <Box flex={1}>
@@ -28,6 +28,9 @@ const Dialog = ({ coupon, onClose, onSubmit }) => (
             <Controls.Button onClick={onClose}>Cancel</Controls.Button>
             <Controls.Button color="blue.0" onClick={onSubmit}>
                 Buy
+            </Controls.Button>
+            <Controls.Button color="blue.0" onClick={onVote}>
+                Vote
             </Controls.Button>
         </Controls.Footer>
     </Box>

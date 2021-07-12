@@ -42,7 +42,7 @@ const mobileMenuSize = {
     md: '85px',
 };
 
-const Header = ({ onCreateCoupon, filterActive, onChangeFilterState }) => {
+const Header = ({ onCreateCoupon, filterActive, onChangeFilterState, onCreateSupplier }) => {
     const [activeUrl, setActiveUrl] = useState('');
     const [isMobile, setMobileState] = useState(false);
     const [isMenuActive, setMenuState] = useState(false);
@@ -76,6 +76,10 @@ const Header = ({ onCreateCoupon, filterActive, onChangeFilterState }) => {
         onCreateCoupon: () => {
             setMenuState(false);
             onCreateCoupon();
+        },
+        onCreateSupplier: () => {
+            setMenuState(false);
+            onCreateSupplier();
         },
         filterActive,
         onChangeFilterState,

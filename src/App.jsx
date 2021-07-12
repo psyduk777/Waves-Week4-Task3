@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect } from 'react';
 import { hot } from 'react-hot-loader/root';
 
@@ -28,6 +29,165 @@ const App = () => {
         }
         fetchData();
     }, []);
+    const baseUri = 'https://nodes-testnet.wavesnodes.com';
+    const contractAddress = '3N6SJ9kZxcbsY2VdDLB6sgXezSLuWmCfKkf';
+
+    async function customerPurchase(coupon) {
+        console.log(coupon);
+
+        const data = {
+            type: 16,
+            data: {
+                fee: {
+                    tokens: '0.05',
+                    assetId: null,
+                },
+                dApp: contractAddress,
+                call: {
+                    function: 'purchase',
+                    args: [
+                        {
+                            type: 'string',
+                            value: coupon.id.toString(),
+                        }],
+                },
+                payment: [{ assetId: null, amount: 5 }],
+            },
+        };
+
+        if (WavesKeeper) {
+            console.log('Broadcasting transaction:');
+            WavesKeeper.signAndPublishTransaction(data)
+                .then((tx) => {
+                    console.log(tx);
+                });
+        }
+    }
+    function supplierCreate() {
+        console.log('Supplier create');
+
+        const data = {
+            type: 16,
+            data: {
+                fee: {
+                    tokens: '0.05',
+                    assetId: null,
+                },
+                dApp: contractAddress,
+                call: {
+                    function: 'registerSupplier',
+                    args: [],
+                },
+                payment: [],
+            },
+        };
+
+        if (WavesKeeper) {
+            console.log('Broadcasting transaction:');
+            WavesKeeper.signAndPublishTransaction(data)
+                .then((tx) => {
+                    console.log(tx);
+                });
+        }
+    }
+
+    function addItem(coupon) {
+        console.log('Add New Item');
+        console.log(coupon);
+
+        const data = {
+            type: 16,
+            data: {
+                fee: {
+                    tokens: '0.05',
+                    assetId: null,
+                },
+                dApp: contractAddress,
+                call: {
+                    function: 'addItem',
+                    args: [
+                        {
+                            type: 'string',
+                            value: coupon.title.toString(),
+                        },
+                        {
+                            type: 'integer',
+                            value: coupon.newPrice,
+                        },
+                        {
+                            type: 'string',
+                            value: JSON.stringify(coupon),
+                        },
+                    ],
+                },
+                payment: [],
+            },
+        };
+
+        if (WavesKeeper) {
+            console.log('Broadcasting transaction:');
+
+            WavesKeeper.signAndPublishTransaction(data)
+                .then((tx) => {
+                    console.log(tx);
+                });
+        }
+    }
+
+    async function digestMessage(message) {
+        const msgUint8 = new TextEncoder().encode(message);                           // encode as (utf-8) Uint8Array
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);           // hash the message
+        const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+        return hashHex;
+    }
+
+    async function commitVote(coupon) {
+
+        const salt = prompt('Enter Salt', 'salt1');
+
+        const voteTypes = {
+            delisted: 'delisted',
+            featured: 'featured',
+        };
+        
+        const hex = await digestMessage(voteTypes.delisted + salt.toString());
+
+        const data = {
+            type: 16,
+            data: {
+                fee: {
+                    tokens: '0.05',
+                    assetId: null,
+                },
+                dApp: contractAddress,
+                call: {
+                    function: 'voteCommit',
+                    args: [
+                        {
+                            type: 'string',
+                            value: coupon.title,
+                        },
+                        {
+                            type: 'string',
+                            value: hex,
+                        },
+
+                    ],
+                },
+                payment: [],
+            },
+        };
+
+        if (WavesKeeper) {
+            console.log('Broadcasting transaction:');
+
+            WavesKeeper.signAndPublishTransaction(data)
+                .then((tx) => {
+                    console.log(tx);
+                });
+        }
+    }
 
     return (
         <>
@@ -35,6 +195,7 @@ const App = () => {
                 onCreateCoupon={onFormOpen}
                 filterActive={filterActive}
                 onChangeFilterState={changeFilterState}
+                onCreateSupplier={supplierCreate}
             />
             <Flex
                 justifyContent="center"
@@ -53,9 +214,13 @@ const App = () => {
                 <Dialog
                     coupon={selectedCoupon}
                     onClose={onDialogClose}
+                    onVote={() => {
+                        commitVote(selectedCoupon);
+                    }}
                     onSubmit={() => {
                         onDialogClose();
                         onResultOpen();
+                        customerPurchase(selectedCoupon);
                     }}
                 />
             </Modal>
@@ -79,6 +244,7 @@ const App = () => {
                         fn([...entity, { ...data, id: new Date().valueOf() }]);
                         onFormClose();
                         onResultOpen();
+                        addItem(data);
                     }}
                 />
             </Modal>
